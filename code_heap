@@ -1,0 +1,378 @@
+// // C++ program to demonstrate building
+
+// and inserting in a Fibonacci heap
+
+#include <cstdlib>
+
+#include <iostream>
+
+#include <malloc.h>
+
+using namespace std;
+
+struct node {
+
+	node* parent;
+
+	node* child;
+
+	node* left;
+
+	node* right;
+
+	int key;
+
+	int degree;
+
+	bool mark;
+
+};
+
+int i = 0;
+
+// Указатель на минимальный узел
+
+struct node* mini = NULL;
+
+struct node* new_min = (struct node*)malloc(sizeof(struct node));
+
+struct node* key_node = (struct node*)malloc(sizeof(struct node));
+
+// Количество узлов
+
+int no_of_nodes = 0;
+int nodes_counter = 0;
+// Функция добавления элемента
+
+void insertion(int val)
+
+{
+	nodes_counter++;
+	struct node* new_node = (struct node*)malloc(sizeof(struct node));
+
+	new_node->key = val;
+
+	new_node->parent = NULL;
+
+	new_node->child = NULL;
+
+	new_node->left = new_node;
+
+	new_node->right = new_node;
+
+	if (mini != NULL) {
+
+		(mini->left)->right = new_node;
+
+		new_node->right = mini;
+
+		new_node->left = mini->left;
+
+		mini->left = new_node;
+
+		if (new_node->key < mini->key)
+
+			mini = new_node;
+
+	}
+
+	else {
+
+		mini = new_node;
+
+	}
+
+}
+
+// Функция вывода кучи
+
+void display(struct node* mini)
+
+{
+
+	node* ptr = mini;
+
+	if (ptr == NULL)
+
+		cout << "Куча пуста." << endl;
+
+	else {
+
+		cout << "Узлы кучи: " << endl;
+
+		do {
+
+			cout << ptr->key;
+
+			ptr = ptr->right;
+
+			if (ptr != mini) {
+
+				cout << "-->";
+
+			}
+
+		} while (ptr != mini && ptr->right != NULL);
+
+		cout << endl
+
+			<< "Куча имеет " << nodes_counter << " узлов." << endl;
+
+	}
+
+}
+
+// Найти минимальный узел
+
+void find_min(struct node* mini)
+
+{
+
+	cout << "Минимальный узел кучи: " << mini->key << endl;
+
+}
+//удалить минимум
+node* delete_min(struct node* mini) {
+
+	if (nodes_counter <= 1) {
+		cout << "Куча пуста." << endl;
+		nodes_counter=0;
+		mini = NULL;
+
+		return mini;
+
+	}
+
+	else {
+
+		//удалить минимальный
+		
+		cout << "Из кучи удален минимальный элемент: " << mini->key << endl;
+
+		mini = mini->right;
+
+		mini->left = (mini->left)->left;
+
+		(mini->left)->right = mini;
+
+		nodes_counter--;
+
+		new_min = mini;
+
+		for (i = 0; i <= (nodes_counter - 1); i++) {
+
+			if ((new_min->key) > ((mini->key))) {
+
+				new_min = mini;
+
+			}
+
+			else {
+
+				new_min = new_min;
+
+			}
+
+			mini = (mini->right);
+
+		}
+
+		mini = new_min;
+
+		cout << "Новый минимум: " << mini->key << endl;
+
+		return mini; //новый минимальный
+
+	}
+
+}
+// удалить по ключу
+node* delete_key(int key,struct node* mini) {
+
+	key_node = mini;
+
+	i = 0;
+
+	nodes_counter--;
+
+	while (i != 1) {
+
+		
+
+		if (((key_node->key) == key)) {
+			if ((key_node->key) == (mini->key)) {
+				mini = key_node->right;
+			}
+			(key_node->left)->right = (key_node->right);
+
+			(key_node->right)->left = (key_node->left);
+
+			i = 1;
+			
+		}
+
+		key_node = (key_node->right);
+
+	}
+	
+	return mini;
+}
+//заменить ключ на ключ
+node* decrease(int key, int key2, struct node* mini) {
+
+	i = 0;
+
+	key_node = mini;
+
+	while (i != 1) {
+
+		if ((key_node->key) == (key)) {
+
+			key_node->key = key2;
+			if ((key_node->key) < (mini->key)) {
+				mini = key_node;
+			}
+			if (((key_node->key) == (mini->key))||((mini->key)<(key2))) {
+				new_min = mini;
+				for (i = 0; i <= (nodes_counter - 1); i++) {
+
+					if ((new_min->key) > ((mini->key))) {
+
+						new_min = mini;
+
+					}
+
+					else {
+
+						new_min = new_min;
+
+					}
+
+					mini = (mini->right);
+
+				}
+
+				mini = new_min;
+			}
+			i = 1;
+			break;
+		}
+
+		key_node = (key_node->right);
+
+	}
+	
+	return mini;
+}
+
+
+// Driver code
+
+int main()
+
+{
+
+	bool end = true;
+
+	int trigger = -1;
+
+	setlocale(LC_ALL, "Russian");
+
+	int value = 0;
+
+	int n_key = 0;
+
+	cout << "Введите количество элементов:";
+
+	cin >> no_of_nodes;
+
+
+	int* cHeaps = new int[no_of_nodes];
+
+	for (i = 0; i <= (no_of_nodes - 1); i++) {
+
+		cout << "Введите " << i << "-ый элемент:";
+
+		cin >> cHeaps[i];
+
+	}
+
+	for (i = 0; i <= (no_of_nodes - 1); i++) {
+
+		insertion(cHeaps[i]);
+
+	}
+
+	while (end != false) {
+
+		value = 0;
+
+		cout << "Выберите действие (0 - добавить элемент, 1-показать кучу, 2 - показать минимум, 3 - удалить минимум, 4 - заменить ключ, 5 - удалить по ключу, 6 - закрыть программу)." << endl;
+
+		cin >> trigger;
+
+		switch (trigger) {
+
+		case 0:
+
+			cout << "Введите элемент:";
+
+			cin >> value;
+
+			insertion(value);
+
+		case 1:
+
+			display(mini);
+
+			break;
+
+		case 2:
+
+			find_min(mini);
+
+			break;
+
+		case 3:
+
+			mini = delete_min(mini);
+
+			break;
+
+		case 4:
+
+			cout << "Введите ключ:";
+
+			cin >> value;
+
+			cout << "Введите новый ключ:";
+
+			cin >> n_key;
+
+			mini=decrease(value, n_key, mini);
+
+			break;
+
+		case 5:
+
+			cout << "Введите ключ:";
+
+			cin >> value;
+
+			mini=delete_key(value,mini);
+
+			break;
+
+		case 6:
+
+			end = false;
+
+			
+
+		}
+
+	}
+
+	return 0;
+
+}
